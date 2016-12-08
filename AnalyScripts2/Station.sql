@@ -8,4 +8,4 @@ insert into station_diff_201609 select * from station_diff_all where to_date(cre
 CREATE TABLE IF NOT EXISTS deltaBy5_201609 AS select * from station_diff_201609 where delta>5 order by station_id, id;
 
 -- export table for visualisation on CARTO
-insert overwrite local directory '/home/chc631/output/201609_diff' row format delimited fields terminated by ',' select * from deltaBy5_201609;
+insert overwrite directory '/user/chc631/output2/deltaby5_201509' row format delimited fields terminated by ',' select * from deltaby5_201509;
