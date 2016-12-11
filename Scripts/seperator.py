@@ -16,19 +16,25 @@ cmd2 = "beeline -u jdbc:hive2://babar.es.its.nyu.edu:10000/CitiBike_Station2 -n 
 gap = len(stations)/20
 
 previous_index=0
-for i in xrange(0,len(stations), gap):
-    if i != previous_index:
-        stations_parse =  stations[previous_index:i]
-        table_name = base_table_name + '_' + str(stations[previous_index]) + '_' + str(stations[i-1])
-        print cmd1 %(username, table_name, og_table, stations_parse[0])
-        proc_1 = subprocess.Popen(shlex.split(cmd1), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output_1, err_1 = proc_1.communicate()
+for i in xrange(gap,len(stations), gap):
+    stations_parse =  stations[previous_index:i]
+    table_name = base_table_name + '_' + str(stations[previous_index]) + '_' + str(stations[i-1])
+    cmd = cmd1 %(username, table_name, og_table, stations_parse[0])
+    print cmd
+    proc_1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output_1, err_1 = proc_1.communicate()
+    print output_1, err_1
+    previous_index = i
 
-        station_parse = stations_parse[1:]
-        for station in stations_parse:
-            print cmd2 %(username, table_name, og_table, station)
-            proc_2 = subprocess.Popen(shlex.split(cmd2), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output_2, err_2 = proc_2.communicate()
+previous_index=0
+for i in xrange(gap,len(stations), gap):
+    station_parse = stations_parse[1:]
+    for station in stations_parse:
+        cmd = cmd2 %(username, table_name, og_table, station)
+        print cmd
+        proc_2 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output_2, err_2 = proc_2.communicate()
+        print output_2, err_2
     previous_index = i
 
 
