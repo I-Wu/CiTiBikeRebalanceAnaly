@@ -1,9 +1,3 @@
-from_unixtime(unix_timestamp(substr('20130502081559999',1,14), 'yyyyMMddHHmmss'))
-
-SELECT a.action_date, b.*
-   FROM  b
-   JOIN  a ON action_date>= activation_date
-           AND (action_date<=deletion_date OR deletion_date='1970-01-01')
 
 
 create table 201609_merge_v1 AS SELECT 201609_wea_v3.newtime, 201609_wea_v3.wtype, station_20160901_07_new.start_time, station_20160901_07_new.end_time, station_20160901_07_new.delta
@@ -24,9 +18,8 @@ create table 201609_merge_v4 AS SELECT * from 201609_merge_v3 where length(wtype
 SELECT AVG(abs(delta)) FROM 201609_merge_v3;
 SELECT AVG(abs(201609_merge_v4.delta)) FROM 201609_merge_v4 where array_contains(split(wtype,' '),'+RA');;
 
-note here: 0.8568075117370892 // 0.4444444444444444 usage drop significantly when it rains heavily (Sep)
 
- create table 201601_merge_v1 AS SELECT 201601_wea_v3.newtime, 201601_wea_v3.wtype, 201601_wea_v3.temp,
+create table 201601_merge_v1 AS SELECT 201601_wea_v3.newtime, 201601_wea_v3.wtype, 201601_wea_v3.temp,
    station_diff_201601.start_time, station_diff_201601.end_time, station_diff_201601.delta
     FROM  station_diff_201601
     JOIN  201601_wea_v3 WHERE newtime<= end_time
@@ -81,12 +74,69 @@ cast(from_unixtime(unix_timestamp(starttime,'M-d-yyyy HH:mm:ss')) AS timestamp) 
 cast(from_unixtime(unix_timestamp(stoptime,'M-d-yyyy HH:mm:ss')) AS timestamp) AS stopt,
 startstationid, endstationid FROM triptable_v5;
 
+CREATE TABLE triptable_v9 AS SELECT ROW_NUMBER() OVER() as row_num, *
+from triptable_v8;
+
 create table tripwea09_v4 AS SELECT a.tripd, a.startt, a.stopt,
 b.time, b.wtype, b.temp
    FROM  triptable_v8 a
    JOIN 201609_wea_full_v4 b
    WHERE b.time  >= a.startt
     AND  b.time  <= a.stopt;
+
+create table tripwea09_v5 AS SELECT a.row_num, a.tripd, a.startt, a.stopt,
+    b.time, b.wtype, b.temp
+       FROM  triptable_v9 a
+       JOIN 201609_wea_full_v4 b
+       WHERE b.time  >= a.startt
+        AND  b.time  <= a.stopt;
+
+CREATE TABLE tripwea09_v6 AS SELECT * FROM tripwea09_v5 where array_contains(split(wtype,' '),'-RA');
+
+CREATE TABLE tripwea09_v7 AS SELECT row_num, tripd, COUNT(distinct time) AS counter
+FROM tripwea09_v6
+GROUP BY row_num,tripd;
+
+SELECT AVG(tripd) FROM tripwea09_v7
+  WHERE counter == 1;  // 1067.574699544136   (9652)
+
+SELECT AVG(tripd) FROM tripwea09_v7
+  WHERE counter == 2; // 7877.977272727273    (1100)
+
+SELECT AVG(tripd) FROM tripwea09_v7
+    WHERE counter >=3; // 147795.94814814813  (270)
+
+SELECT AVG(tripd) FROM tripwea09_v7 WHERE tripd < 4500;  //  1018.7260881880842#10591
+SELECT AVG(tripd) FROM tripwea09_v7;                     //  5341.581564144439
+
+
+CREATE TABLE tripwea09_v8 AS SELECT * FROM tripwea09_v5 where array_contains(split(wtype,' '),'+RA');
+
+CREATE TABLE tripwea09_v9 AS SELECT row_num, tripd, COUNT(distinct time) AS counter
+FROM tripwea09_v8
+GROUP BY row_num,tripd;
+
+
+
+SELECT AVG(tripd) FROM tripwea09_v9 WHERE tripd < 4500;
+SELECT AVG(tripd) FROM tripwea09_v9;
+
+SELECT AVG(tripd) FROM tripwea09_v5 WHERE tripd < 4500;
+
+// Repeat this for every month
+
+CREATE TABLE trip1015_0916_v2 AS SELECT
+cast(tripduration AS int) AS tripd,
+cast(from_unixtime(unix_timestamp(starttime,'M-d-yyyy HH:mm:ss')) AS timestamp) AS startt,
+cast(from_unixtime(unix_timestamp(stoptime,'M-d-yyyy HH:mm:ss')) AS timestamp) AS stopt,
+startstationid, endstationid FROM trip1015_0916;
+
+
+
+
+
+
+
 
 
 "20160201000000",'yyyyMMddHHmmss'
