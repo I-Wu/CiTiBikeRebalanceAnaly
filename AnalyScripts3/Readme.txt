@@ -1,6 +1,7 @@
-﻿—————————————————-———
+—————————————————-———
 *        New York Citi Bike data analytics        *
 —————————————————-———
+
 ***Data Profiling
 -Weather Data
 File: Profile.jar      
