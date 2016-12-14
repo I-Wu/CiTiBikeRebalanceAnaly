@@ -3,34 +3,34 @@
 -- Set reducer number as 1
 -- set hive.exec.reducers.max=1;
 
-/*
---join the table of bike trip information and the table of bike station information for output number
-create table station_outtrip_timeperiod
-AS SELECT Trip1015_0916.startstationid, Trip1015_0916.starttime, 
-station_diff_201510_201609_service_nonull_nodup.start_time, 
-station_diff_201510_201609_service_nonull_nodup.end_time, 
-station_diff_201510_201609_service_nonull_nodup.dock_id, 
-station_diff_201510_201609_service_nonull_nodup.bike_delta
-FROM station_diff_201510_201609_service_nonull_nodup
-JOIN Trip1015_0916
-WHERE unix_timestamp(starttime, 'MM-dd-yyyy HH:mm:ss') BETWEEN  start_time AND end_time 
-AND startstationid == dock_id
-ORDER BY dock_id, start_time;
 
+-- --join the table of bike trip information and the table of bike station information for output number
+-- create table station_outtrip_timeperiod
+-- AS SELECT Trip1015_0916.startstationid, Trip1015_0916.starttime, 
+-- station_diff_201510_201609_service_nonull_nodup.start_time, 
+-- station_diff_201510_201609_service_nonull_nodup.end_time, 
+-- station_diff_201510_201609_service_nonull_nodup.dock_id, 
+-- station_diff_201510_201609_service_nonull_nodup.bike_delta
+-- FROM station_diff_201510_201609_service_nonull_nodup
+-- JOIN Trip1015_0916
+-- WHERE unix_timestamp(starttime, 'MM-dd-yyyy HH:mm:ss') BETWEEN  start_time AND end_time 
+-- AND startstationid == dock_id
+-- ORDER BY dock_id, start_time;
+-- 
+-- 
+-- --join the table of bike trip information and the table of bike station information for input number
+-- create table station_intrip_timeperiod
+-- AS SELECT Trip1015_0916.endstationid, Trip1015_0916.stoptime, 
+-- station_diff_201510_201609_service_nonull_nodup.start_time, 
+-- station_diff_201510_201609_service_nonull_nodup.end_time, 
+-- station_diff_201510_201609_service_nonull_nodup.dock_id, 
+-- station_diff_201510_201609_service_nonull_nodup.bike_delta
+-- FROM station_diff_201510_201609_service_nonull_nodup
+-- JOIN Trip1015_0916
+-- WHERE unix_timestamp(stoptime, 'MM-dd-yyyy HH:mm:ss') BETWEEN  start_time AND end_time 
+-- AND endstationid == dock_id
+-- ORDER BY dock_id, start_time;
 
---join the table of bike trip information and the table of bike station information for input number
-create table station_intrip_timeperiod
-AS SELECT Trip1015_0916.endstationid, Trip1015_0916.stoptime, 
-station_diff_201510_201609_service_nonull_nodup.start_time, 
-station_diff_201510_201609_service_nonull_nodup.end_time, 
-station_diff_201510_201609_service_nonull_nodup.dock_id, 
-station_diff_201510_201609_service_nonull_nodup.bike_delta
-FROM station_diff_201510_201609_service_nonull_nodup
-JOIN Trip1015_0916
-WHERE unix_timestamp(stoptime, 'MM-dd-yyyy HH:mm:ss') BETWEEN  start_time AND end_time 
-AND endstationid == dock_id
-ORDER BY dock_id, start_time;
-*/
 
 -- trip table for only 201609   
 CREATE TABLE trip_09
@@ -70,7 +70,7 @@ count(*) as outflow,
 station_outtrip09_timeperiod_1.bike_delta as station_bike_delta
 FROM station_outtrip09_timeperiod_1
 GROUP BY dock_id, start_time, end_time, bike_delta;
-/*
+
 -- join trip and station table by each station id and time period for input trips
 create table station_intrip09_timeperiod
 AS SELECT trip_09.endstationid, trip_09.stoptime, 
@@ -94,9 +94,9 @@ count(*) as inflow,
 station_intrip09_timeperiod.bike_delta as station_bike_delta
 FROM station_intrip09_timeperiod
 GROUP BY dock_id, start_time, end_time, bike_delta;
-*/
+
 -----------------------------------
-/*
+
 --Compute the bike_delta of (inflow- outflow) from trip data and match with the bike_delta from station data
 create table intrip09_tripbike_delta_v2
 AS SELECT
@@ -115,16 +115,16 @@ JOIN intrip09_timeperiod_count
 WHERE intrip09_timeperiod_count.dock_id == outtrip09_timeperiod_count.dock_id
 AND intrip09_timeperiod_count.start_time == outtrip09_timeperiod_count.start_time
 ORDER BY in_dock_id, in_start_time;
-*/
 
 
-------------------------------------------------
---Examine the bike_delta matching 
-/*
-select count (*) from intrip09_tripbike_delta_v2 WHERE (station_bike_delta - trip_bike_delta == 0);
->  21679 
-select count (*) from intrip09_tripbike_delta_v2;
-> 130776
 
-select in_dock_id, in_start_time, in_end_time from intrip09_tripbike_delta_v2 WHERE (abs(station_bike_delta - trip_bike_delta) >= 5) limit 50;
-*/
+-- ------------------------------------------------
+-- --Examine the bike_delta matching 
+-- 
+-- select count (*) from intrip09_tripbike_delta_v2 WHERE (station_bike_delta - trip_bike_delta == 0);
+-- >  21679 
+-- select count (*) from intrip09_tripbike_delta_v2;
+-- > 130776
+-- 
+-- select in_dock_id, in_start_time, in_end_time from intrip09_tripbike_delta_v2 WHERE (abs(station_bike_delta - trip_bike_delta) >= 5) limit 50;
+-- 
